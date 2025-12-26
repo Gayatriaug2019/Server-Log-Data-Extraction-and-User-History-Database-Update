@@ -34,7 +34,7 @@ def transform_data(data):
     return transformed_data
 
 # Task 3: Save Data to MongoDB
-def save_to_mongodb(data, mongo_uri="mongodb+srv://gborole:Mongopassword@cluster0.xoqcp.mongodb.net/?appName=Cluster0", db_name="mini_proj2", collection_name="user_history"):
+def save_to_mongodb(data, mongo_uri="mongodb+srv://<your_username>:<your_password>@cluster0.xoqcp.mongodb.net/?appName=Cluster0", db_name="mini_proj2", collection_name="user_history"):
     client = pymongo.MongoClient(mongo_uri)
     db = client[db_name]
     collection = db[collection_name]
@@ -42,7 +42,7 @@ def save_to_mongodb(data, mongo_uri="mongodb+srv://gborole:Mongopassword@cluster
     client.close()
 
 # Task 4: Save Data to SQLite
-def save_to_sqlite(mongo_uri="mongodb+srv://gborole:Mongopassword@cluster0.xoqcp.mongodb.net/?appName=Cluster0", db_name="mini_proj2", collection_name="user_history", sqlite_db_path="user_history.db"):
+def save_to_sqlite(mongo_uri="mongodb+srv://<your_username>:<your_password>@cluster0.xoqcp.mongodb.net/?appName=Cluster0", db_name="mini_proj2", collection_name="user_history", sqlite_db_path="user_history.db"):
     # Connect to MongoDB
     client = pymongo.MongoClient(mongo_uri)
     db = client[db_name]
