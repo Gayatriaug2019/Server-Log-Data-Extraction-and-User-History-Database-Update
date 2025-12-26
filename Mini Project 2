@@ -1,0 +1,96 @@
+!pip install pymongo
+
+import re
+import pymongo
+import sqlite3
+from datetime import datetime
+
+# Task 1: Extract Email Addresses and Dates
+def extract_emails_and_dates(log_file_path):
+    extracted_data = []
+    email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+    date_pattern = r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}'
+
+    with open(log_file_path, 'r') as file:
+        for line in file:
+            email_match = re.search(email_pattern, line)
+            date_match = re.search(date_pattern, line)
+            if email_match and date_match:
+                email = email_match.group()
+                date = date_match.group()
+                extracted_data.append({"email": email, "date": date})
+
+    return extracted_data
+
+# Task 2: Data Transformation
+def transform_data(data):
+    transformed_data = []
+    for record in data:
+        email = record["email"]
+        date = datetime.strptime(record["date"], '%Y-%m-%d %H:%M:%S')
+        transformed_record = {"email": email, "date": date.strftime('%Y-%m-%d %H:%M:%S')}
+        transformed_data.append(transformed_record)
+
+    return transformed_data
+
+# Task 3: Save Data to MongoDB
+def save_to_mongodb(data, mongo_uri="mongodb+srv://gborole:Mongopassword@cluster0.xoqcp.mongodb.net/?appName=Cluster0", db_name="mini_proj2", collection_name="user_history"):
+    client = pymongo.MongoClient(mongo_uri)
+    db = client[db_name]
+    collection = db[collection_name]
+    collection.insert_many(data)
+    client.close()
+
+# Task 4: Save Data to SQLite
+def save_to_sqlite(mongo_uri="mongodb+srv://gborole:Mongopassword@cluster0.xoqcp.mongodb.net/?appName=Cluster0", db_name="mini_proj2", collection_name="user_history", sqlite_db_path="user_history.db"):
+    # Connect to MongoDB
+    client = pymongo.MongoClient(mongo_uri)
+    db = client[db_name]
+    collection = db[collection_name]
+
+    # Fetch data from MongoDB
+    data = list(collection.find({}, {"_id": 0}))
+    client.close()
+
+    # Connect to SQLite
+    conn = sqlite3.connect(sqlite_db_path)
+    cursor = conn.cursor()
+
+    # Create table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS user_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT NOT NULL,
+        date DATETIME NOT NULL
+    );
+    ''')
+
+    # Insert data into SQLite
+    for record in data:
+        cursor.execute(
+            "INSERT INTO user_history (email, date) VALUES (?, ?)",
+            (record["email"], record["date"])
+        )
+
+    conn.commit()
+    conn.close()
+
+# Main Execution
+if __name__ == "__main__":
+    log_file_path = "/content/mbox.txt"  # Replace with your log file path
+
+    # Task 1: Extract Emails and Dates
+    raw_data = extract_emails_and_dates(log_file_path)
+    print("Extracted Data:", raw_data)
+
+    # Task 2: Transform Data
+    transformed_data = transform_data(raw_data)
+    print("Transformed Data:", transformed_data)
+
+    # Task 3: Save to MongoDB
+    save_to_mongodb(transformed_data)
+    print("Data saved to MongoDB.")
+
+    # Task 4: Save to SQLite
+    save_to_sqlite()
+    print("Data saved to SQLite.")
