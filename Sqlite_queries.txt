@@ -1,0 +1,77 @@
+1) List all unique email addresses
+
+SELECT DISTINCT email
+FROM user_history;
+
+2) Count the number of emails received per day
+
+SELECT 
+    DATE(date) AS day,
+    COUNT(*) AS email_count
+FROM user_history
+GROUP BY DATE(date)
+ORDER BY day;
+
+3) Find the first and last email date for each email address
+
+SELECT 
+    email,
+    MIN(date) AS first_email_date,
+    MAX(date) AS last_email_date
+FROM user_history
+GROUP BY email;
+
+4) Count the total number of emails from each email domain
+
+SELECT 
+    SUBSTR(email, INSTR(email, '@') + 1) AS domain,
+    COUNT(*) AS total_emails
+FROM user_history
+GROUP BY domain
+ORDER BY total_emails DESC;
+
+5) How many total emails are there in the table?
+
+SELECT COUNT(*) AS total_emails
+FROM user_history;
+
+6)  Find the top 5 email addresses that sent the most emails
+
+SELECT 
+    email,
+    COUNT(*) AS email_count
+FROM user_history
+GROUP BY email
+ORDER BY email_count DESC
+LIMIT 5;
+
+7) Find emails received today
+
+SELECT *
+FROM user_history
+WHERE DATE(date) = DATE('now');
+
+8) Find emails received in the last 7 days
+
+SELECT *
+FROM user_history
+WHERE DATE(date) >= DATE('now', '-7 days');
+
+9) Count emails received per month
+
+SELECT 
+    STRFTIME('%Y-%m', date) AS month,
+    COUNT(*) AS email_count
+FROM user_history
+GROUP BY month
+ORDER BY month;
+
+10) Find the day with the highest number of emails
+
+SELECT 
+    DATE(date) AS day,
+    COUNT(*) AS email_count
+FROM user_history
+GROUP BY day
+ORDER BY email_count DESC
+LIMIT 1;
